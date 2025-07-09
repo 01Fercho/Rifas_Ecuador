@@ -105,3 +105,63 @@ PUERTO DE CORREO ELECTRÓNICO = 587
 EMAIL_USE_TLS = Verdadero
 USUARIO_DEL_HOST_DE_CORREO_ELECTRÓNICO = os.environ.get('USUARIO_DEL_HOST_DE_CORREO_ELECTRÓNICO')
 CONTRASEÑA_DEL_HOST_DE_EMAIL = os.environ.get('CONTRASEÑA_DEL_HOST_DE_EMAIL')
+git clone https://github.com/01Fercho/rifas_ecuador.git
+cd rifas_ecuador
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py runserver
+python manage.py shell
+from core.views import run_draw
+run_draw(<raffle_id>)
+dj-database-url
+psycopg2-binary
+whitenoise
+import os
+import dj_database_url
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'change-me')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+# Database
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
+
+# Static files
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # ...
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Proxy SSL header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#!/usr/bin/env bash
+set -o errexit
+
+pip install -r requirements.txt
+python manage.py collectstatic --no-input
+python manage.py migrate
+web: gunicorn rifas_ecuador.wsgi:application
+DATABASE_URL=<la URL de tu base de datos Render>
+DJANGO_SECRET_KEY=...
+DEBUG=False
+ALLOWED_HOSTS=<tuServicio>.onrender.com
+EMAIL_HOST_USER=...
+EMAIL_HOST_PASSWORD=...
+STRIPE_SECRET_KEY=...
+STRIPE_WEBHOOK_SECRET=...
+PAYPAL_CLIENT_ID=...
+PAYPAL_SECRET=...
